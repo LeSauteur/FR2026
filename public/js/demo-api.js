@@ -2,8 +2,8 @@
 // Он повторяет контракты серверного API на вымышленных данных и хранит изменения
 // только в localStorage конкретного браузера. Серверный режим его не использует.
 
-import { CALCULATORS, POLICIES } from '../../shared/calculators.js';
-import { moscowDate, weekdayId } from '../../shared/dates.js';
+import { CALCULATORS, POLICIES } from '../shared/calculators.js';
+import { moscowDate, weekdayId } from '../shared/dates.js';
 
 const STORAGE_KEY = 'domian-hub-demo-v1';
 const SUPPORT_CATEGORIES = ['it', 'hr', 'pr', 'newbuild', 'franchise', 'finance'];
