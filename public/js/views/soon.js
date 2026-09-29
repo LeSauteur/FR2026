@@ -1,4 +1,4 @@
-import { html } from '../lib.js?v=20260929-2';
+import { html } from '../lib.js?v=20260929-3';
 
 const PLANNED = {
   finance: {

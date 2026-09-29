@@ -1,4 +1,4 @@
-import { html, api, fmtDate, fmtPercent, toast, icon, MEMBER_LABELS } from '../lib.js?v=20260929-2';
+import { html, api, fmtDate, fmtPercent, toast, icon, MEMBER_LABELS } from '../lib.js?v=20260929-3';
 
 const STATUS = { active: ['Работает', 'ok'], paused: ['Пауза', 'warn'], archived: ['Архив', ''] };
 const statusPill = (s) => html`<span class="pill ${STATUS[s]?.[1] || ''}">${STATUS[s]?.[0] || s}</span>`;

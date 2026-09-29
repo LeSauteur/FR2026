@@ -1,6 +1,6 @@
 // Общие помощники интерфейса. Все данные вставляются через html`` с экранированием.
 
-import { demoApi } from './demo-api.js?v=20260929-2';
+import { demoApi } from './demo-api.js?v=20260929-3';
 
 export const DEMO_MODE = typeof location !== 'undefined'
   && (location.hostname.endsWith('github.io') || new URLSearchParams(location.search).has('demo'));

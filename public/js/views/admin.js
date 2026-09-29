@@ -1,4 +1,4 @@
-import { html, api, fmtDate, ROLE_LABELS } from '../lib.js?v=20260929-2';
+import { html, api, fmtDate, ROLE_LABELS } from '../lib.js?v=20260929-3';
 
 export async function adminView({ me }) {
   if (!me.isStaff) return { title: 'Нет доступа', body: html`<div class="empty">Раздел доступен франшизному отделу.</div>` };
