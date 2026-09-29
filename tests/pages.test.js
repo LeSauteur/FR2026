@@ -28,7 +28,7 @@ test('точки загрузки демо-модулей версиониров
   assert.ok(appViewImports.length >= 9);
   assert.ok(appViewImports.every((statement) => /\?v=\d{8}-\d+'$/.test(statement)));
 
-  for (const file of ['admin', 'announcements', 'calculators', 'home', 'knowledge', 'offices', 'soon', 'support', 'work']) {
+  for (const file of ['admin', 'announcements', 'calculators', 'home', 'knowledge', 'offices', 'support', 'finance', 'documents', 'training', 'hr', 'work']) {
     const view = readFileSync(join(ROOT, 'public', 'js', 'views', `${file}.js`), 'utf8');
     assert.match(view, /from '\.\.\/lib\.js\?v=\d{8}-\d+'/);
   }

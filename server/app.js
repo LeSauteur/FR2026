@@ -14,6 +14,8 @@ import {
 } from './http.js';
 import { CALCULATORS, POLICIES } from '../shared/calculators.js';
 import { moscowDate, isIsoDate, weekdayId } from '../shared/dates.js';
+import { officeFinance, documentsView, trainingView, daysAgoIso } from '../shared/sections.js';
+import { readFileSync } from 'node:fs';
 
 const PUBLIC_DIR = join(ROOT, 'public');
 const SHARED_DIR = join(ROOT, 'shared');
@@ -297,6 +299,68 @@ route('PATCH', '/api/support/:id', async (ctx) => {
 }, { roles: ['superadmin', 'franchise'] });
 
 // ----- Администрирование -----
+
+// ----- Этапы 2–4 на демо-наполнении (seed/demo-sections.json) -----
+// Пока данных нет в БД, разделы показывают вымышленные примеры; права — как у настоящих.
+
+let sectionsCache;
+const sections = () => (sectionsCache ??= JSON.parse(readFileSync(join(ROOT, 'seed', 'demo-sections.json'), 'utf8')));
+
+function visibleOfficeNames(ctx) {
+  const rows = isStaff(ctx.user)
+    ? ctx.db.prepare('SELECT id, name, city FROM offices').all()
+    : ctx.db.prepare(`SELECT o.id, o.name, o.city FROM offices o JOIN office_memberships m ON m.office_id = o.id
+                      WHERE m.user_id = ?`).all(ctx.user.id);
+  return rows;
+}
+
+route('GET', '/api/finance', (ctx) => ({
+  offices: visibleOfficeNames(ctx)
+    .filter((o) => sections().finance.offices[o.name])
+    .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+    .map((o) => ({ id: o.id, name: o.name, city: o.city, ...officeFinance(sections().finance.offices[o.name], moscowDate()) })),
+}));
+
+route('GET', '/api/documents', () => documentsView(sections().documents));
+
+const trainingProgress = (ctx) => {
+  const rows = ctx.db.prepare('SELECT course_id, lessons_done FROM training_progress WHERE user_id = ?').all(ctx.user.id);
+  return rows.length
+    ? Object.fromEntries(rows.map((r) => [r.course_id, r.lessons_done]))
+    : sections().training.defaultProgress[ctx.user.login] || {};
+};
+
+route('GET', '/api/training', (ctx) => trainingView(sections().training, trainingProgress(ctx)));
+
+route('POST', '/api/training/progress', async (ctx) => {
+  const body = await readJson(ctx.req);
+  const course = sections().training.courses.find((c) => c.id === body.courseId);
+  if (!course) throw new HttpError(404, 'Курс не найден.');
+  const done = Math.max(0, Math.min(course.lessons.length, Math.floor(Number(body.done) || 0)));
+  transaction(ctx.db, () => {
+    // Первое сохранение фиксирует и демо-прогресс по остальным курсам.
+    for (const [id, n] of Object.entries(trainingProgress(ctx))) {
+      ctx.db.prepare('INSERT OR IGNORE INTO training_progress (user_id, course_id, lessons_done) VALUES (?, ?, ?)').run(ctx.user.id, id, n);
+    }
+    ctx.db.prepare(`INSERT INTO training_progress (user_id, course_id, lessons_done) VALUES (?, ?, ?)
+                    ON CONFLICT(user_id, course_id) DO UPDATE SET lessons_done = excluded.lessons_done, updated_at = datetime('now')`)
+      .run(ctx.user.id, course.id, done);
+  });
+  return { ok: true };
+});
+
+route('GET', '/api/hr', (ctx) => {
+  const allowed = new Set(visibleOfficeNames(ctx).map((o) => o.name));
+  const { hr } = sections();
+  return {
+    stages: hr.stages,
+    stageOwners: hr.stageOwners,
+    candidates: hr.candidates.filter((c) => allowed.has(c.office)).map((c) => ({ ...c, started_at: daysAgoIso(c.startedDaysAgo) })),
+    checklists: hr.checklists,
+    canAdvance: false,
+    readOnly: true,
+  };
+});
 
 route('GET', '/api/admin/users', (ctx) => ({
   users: ctx.db.prepare(`SELECT u.id, u.login, u.display_name, u.role, u.is_active, u.last_login_at,

@@ -1,6 +1,6 @@
 // Общие помощники интерфейса. Все данные вставляются через html`` с экранированием.
 
-import { demoApi } from './demo-api.js?v=20260929-3';
+import { demoApi } from './demo-api.js?v=20260929-4';
 
 export const DEMO_MODE = typeof location !== 'undefined'
   && (location.hostname.endsWith('github.io') || new URLSearchParams(location.search).has('demo'));
@@ -30,6 +30,8 @@ export function render(target, content) {
   target.innerHTML = piece(content);
   // CSP запрещает атрибут style="…", поэтому ширину полос задаём через CSSOM.
   for (const el of target.querySelectorAll('[data-width]')) el.style.width = `${Number(el.dataset.width) || 0}%`;
+  for (const el of target.querySelectorAll('[data-height]')) el.style.height = `${Number(el.dataset.height) || 0}%`;
+  for (const el of target.querySelectorAll('[data-bottom]')) el.style.bottom = `${Number(el.dataset.bottom) || 0}%`;
 }
 
 // ---------- API ----------

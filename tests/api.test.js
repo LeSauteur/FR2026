@@ -219,3 +219,24 @@ test('во фронтенде нет паролей, токенов и рекв�
     assert.doesNotMatch(text, /(ACCESS_CODE|validTokens|const\s+PASSWORD)/i, `${file}: секрет во фронтенде`);
   }
 });
+
+test('финансы и HR: собственник видит только свои офисы', async () => {
+  const owner = await login('owner2');
+  const finance = await call('/api/finance', { cookie: owner });
+  assert.deepEqual(finance.data.offices.map((o) => o.name), ['Демо-Юг']);
+  const hr = await call('/api/hr', { cookie: owner });
+  assert.ok(hr.data.candidates.length > 0);
+  assert.ok(hr.data.candidates.every((c) => c.office === 'Демо-Юг'));
+  const staff = await call('/api/finance', { cookie: await login('franchise') });
+  assert.equal(staff.data.offices.length, 4);
+});
+
+test('обучение: прогресс сохраняется у пользователя', async () => {
+  const cookie = await login('owner2');
+  await call('/api/training/progress', { method: 'POST', cookie, body: { courseId: 'office-economics', done: 4 } });
+  const t = await call('/api/training', { cookie });
+  assert.ok(t.data.courses.find((c) => c.id === 'office-economics').completed);
+  assert.equal(t.data.courses.find((c) => c.id === 'owner-start').done, 3, 'демо-прогресс по другим курсам не потерян');
+  const other = await call('/api/training', { cookie: await login('owner1') });
+  assert.equal(other.data.courses.find((c) => c.id === 'office-economics').done, 2);
+});

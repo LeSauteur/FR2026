@@ -1,13 +1,16 @@
-import { html, render, api, ApiError, icon, ROLE_LABELS, DEMO_MODE } from './lib.js?v=20260929-3';
-import { homeView } from './views/home.js?v=20260929-3';
-import { weekView } from './views/work.js?v=20260929-3';
-import { officesView, officeView, networkView } from './views/offices.js?v=20260929-3';
-import { calculatorsView } from './views/calculators.js?v=20260929-3';
-import { knowledgeView, articleView } from './views/knowledge.js?v=20260929-3';
-import { announcementsView } from './views/announcements.js?v=20260929-3';
-import { supportView } from './views/support.js?v=20260929-3';
-import { adminView } from './views/admin.js?v=20260929-3';
-import { soonView } from './views/soon.js?v=20260929-3';
+import { html, render, api, ApiError, icon, ROLE_LABELS, DEMO_MODE } from './lib.js?v=20260929-4';
+import { homeView } from './views/home.js?v=20260929-4';
+import { weekView } from './views/work.js?v=20260929-4';
+import { officesView, officeView, networkView } from './views/offices.js?v=20260929-4';
+import { calculatorsView } from './views/calculators.js?v=20260929-4';
+import { knowledgeView, articleView } from './views/knowledge.js?v=20260929-4';
+import { announcementsView } from './views/announcements.js?v=20260929-4';
+import { supportView } from './views/support.js?v=20260929-4';
+import { adminView } from './views/admin.js?v=20260929-4';
+import { financeView } from './views/finance.js?v=20260929-4';
+import { documentsView } from './views/documents.js?v=20260929-4';
+import { trainingView } from './views/training.js?v=20260929-4';
+import { hrView } from './views/hr.js?v=20260929-4';
 
 const app = document.getElementById('app');
 const state = { me: null };
@@ -51,7 +54,10 @@ const ROUTES = [
   [/^\/announcements$/, announcementsView],
   [/^\/support$/, supportView],
   [/^\/admin$/, adminView],
-  [/^\/(finance|documents|training|hr)$/, soonView],
+  [/^\/finance$/, financeView],
+  [/^\/documents$/, documentsView],
+  [/^\/training$/, trainingView],
+  [/^\/hr$/, hrView],
 ];
 
 const currentPath = () => {
@@ -110,7 +116,7 @@ function navHtml(path) {
     ${g.group ? html`<div class="nav-group">${g.group}</div>` : ''}
     ${g.items.map((item) => {
       const active = item.path === '/' ? path === '/' : path.startsWith(item.path);
-      return html`<a href="#${item.path}" class="${item.stage ? 'soon' : ''}" ${active ? html`aria-current="page"` : ''}>
+      return html`<a href="#${item.path}" ${active ? html`aria-current="page"` : ''}>
         ${icon(item.icon)}<span>${item.label}</span>${item.stage ? html`<span class="tag">этап ${item.stage}</span>` : ''}</a>`;
     })}`);
 }

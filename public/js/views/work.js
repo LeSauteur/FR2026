@@ -1,4 +1,4 @@
-import { html, api, fmtDate, toast, DEMO_MODE } from '../lib.js?v=20260929-3';
+import { html, api, fmtDate, toast, DEMO_MODE } from '../lib.js?v=20260929-4';
 
 // Дата выбранного дня текущей недели (Пн–Вс) относительно сегодняшней московской даты.
 function dateForDay(today, position) {

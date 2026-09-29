@@ -1,4 +1,4 @@
-import { html, render, api, fmtMoney, fmtPercent, fmtDate, toast } from '../lib.js?v=20260929-3';
+import { html, render, api, fmtMoney, fmtPercent, fmtDate, toast } from '../lib.js?v=20260929-4';
 // Та же формула, что проверяется тестами и пересчитывается сервером при сохранении.
 import { calculateRoyalty, calculateMotivation, CALCULATORS } from '../../shared/calculators.js';
 import { ROYALTY_POLICY_2026 } from '../../shared/policies/royalty-2026.js';
