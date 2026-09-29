@@ -1,8 +1,8 @@
-import { html, render, api, ApiError, icon, ROLE_LABELS, DEMO_MODE } from './lib.js';
+import { html, render, api, ApiError, icon, ROLE_LABELS, DEMO_MODE } from './lib.js?v=20260929-2';
 import { homeView } from './views/home.js';
 import { weekView } from './views/work.js';
 import { officesView, officeView, networkView } from './views/offices.js';
-import { calculatorsView } from './views/calculators.js';
+import { calculatorsView } from './views/calculators.js?v=20260929-2';
 import { knowledgeView, articleView } from './views/knowledge.js';
 import { announcementsView } from './views/announcements.js';
 import { supportView } from './views/support.js';
