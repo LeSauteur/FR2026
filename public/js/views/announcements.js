@@ -1,4 +1,4 @@
-import { html, api, fmtDate, paragraphs, toast, EVENT_LABELS } from '../lib.js';
+import { html, api, fmtDate, paragraphs, toast, EVENT_LABELS } from '../lib.js?v=20260929-2';
 
 export async function announcementsView({ rerender }) {
   const { announcements, events } = await api('/api/announcements');

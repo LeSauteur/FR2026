@@ -23,4 +23,13 @@ test('точки загрузки демо-модулей версиониров
   assert.match(app, /\.\/lib\.js\?v=\d{8}-\d+/);
   assert.match(app, /\.\/views\/calculators\.js\?v=\d{8}-\d+/);
   assert.match(lib, /\.\/demo-api\.js\?v=\d{8}-\d+/);
+
+  const appViewImports = [...app.matchAll(/from '\.\/views\/[^']+'/g)].map((match) => match[0]);
+  assert.ok(appViewImports.length >= 9);
+  assert.ok(appViewImports.every((statement) => /\?v=\d{8}-\d+'$/.test(statement)));
+
+  for (const file of ['admin', 'announcements', 'calculators', 'home', 'knowledge', 'offices', 'soon', 'support', 'work']) {
+    const view = readFileSync(join(ROOT, 'public', 'js', 'views', `${file}.js`), 'utf8');
+    assert.match(view, /from '\.\.\/lib\.js\?v=\d{8}-\d+'/);
+  }
 });
