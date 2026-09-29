@@ -1,0 +1,18 @@
+{
+  "name": "domian-hub",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Кабинет собственника Домиан — приватный сервис для франчайзи. Локальный каркас.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "build:pages": "node scripts/build-pages.js",
+    "seed": "node --disable-warning=ExperimentalWarning scripts/seed.js",
+    "reset": "node --disable-warning=ExperimentalWarning scripts/seed.js --reset",
+    "import:7days": "node scripts/import-7days.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/**/*.test.js\""
+  }
+}
