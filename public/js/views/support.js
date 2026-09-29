@@ -1,4 +1,4 @@
-import { html, api, fmtDate, toast, SUPPORT_LABELS, STATUS_LABELS } from '../lib.js';
+import { html, api, fmtDate, toast, SUPPORT_LABELS, STATUS_LABELS } from '../lib.js?v=20260929-2';
 
 const STATUS_CLASS = { new: 'red', in_progress: 'warn', done: 'ok', rejected: '' };
 

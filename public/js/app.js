@@ -1,13 +1,13 @@
 import { html, render, api, ApiError, icon, ROLE_LABELS, DEMO_MODE } from './lib.js?v=20260929-2';
-import { homeView } from './views/home.js';
-import { weekView } from './views/work.js';
-import { officesView, officeView, networkView } from './views/offices.js';
+import { homeView } from './views/home.js?v=20260929-2';
+import { weekView } from './views/work.js?v=20260929-2';
+import { officesView, officeView, networkView } from './views/offices.js?v=20260929-2';
 import { calculatorsView } from './views/calculators.js?v=20260929-2';
-import { knowledgeView, articleView } from './views/knowledge.js';
-import { announcementsView } from './views/announcements.js';
-import { supportView } from './views/support.js';
-import { adminView } from './views/admin.js';
-import { soonView } from './views/soon.js';
+import { knowledgeView, articleView } from './views/knowledge.js?v=20260929-2';
+import { announcementsView } from './views/announcements.js?v=20260929-2';
+import { supportView } from './views/support.js?v=20260929-2';
+import { adminView } from './views/admin.js?v=20260929-2';
+import { soonView } from './views/soon.js?v=20260929-2';
 
 const app = document.getElementById('app');
 const state = { me: null };
