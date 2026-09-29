@@ -1,8 +1,8 @@
 import { html, render, api, fmtMoney, fmtPercent, fmtDate, toast } from '../lib.js';
 // Та же формула, что проверяется тестами и пересчитывается сервером при сохранении.
-import { calculateRoyalty, calculateMotivation, CALCULATORS } from '../../../shared/calculators.js';
-import { ROYALTY_POLICY_2026 } from '../../../shared/policies/royalty-2026.js';
-import { MOTIVATION_POLICY_2026 } from '../../../shared/policies/motivation-2026.js';
+import { calculateRoyalty, calculateMotivation, CALCULATORS } from '../../shared/calculators.js';
+import { ROYALTY_POLICY_2026 } from '../../shared/policies/royalty-2026.js';
+import { MOTIVATION_POLICY_2026 } from '../../shared/policies/motivation-2026.js';
 
 const readForm = (form) => {
   const data = {};
