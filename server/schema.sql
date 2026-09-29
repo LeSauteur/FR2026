@@ -165,6 +165,14 @@ CREATE TABLE IF NOT EXISTS support_requests (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS training_progress (
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id    TEXT NOT NULL,
+  lessons_done INTEGER NOT NULL DEFAULT 0,
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, course_id)
+);
+
 -- Кто, что, когда, старое и новое значение.
 CREATE TABLE IF NOT EXISTS audit_log (
   id         INTEGER PRIMARY KEY,

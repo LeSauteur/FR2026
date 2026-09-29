@@ -1,4 +1,4 @@
-import { html, api, fmtDate, paragraphs } from '../lib.js?v=20260929-3';
+import { html, api, fmtDate, paragraphs } from '../lib.js?v=20260929-4';
 
 export async function knowledgeView({ query }) {
   const q = query.get('q') || '';

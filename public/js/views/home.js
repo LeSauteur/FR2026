@@ -1,4 +1,4 @@
-import { html, api, icon, fmtDate, greeting, EVENT_LABELS } from '../lib.js?v=20260929-3';
+import { html, api, icon, fmtDate, greeting, EVENT_LABELS } from '../lib.js?v=20260929-4';
 
 export async function homeView({ me }) {
   const d = await api('/api/dashboard');

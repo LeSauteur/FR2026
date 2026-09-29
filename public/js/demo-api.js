@@ -4,6 +4,7 @@
 
 import { CALCULATORS, POLICIES } from '../shared/calculators.js';
 import { moscowDate, weekdayId } from '../shared/dates.js';
+import { officeFinance, documentsView, trainingView, daysAgoIso } from '../shared/sections.js';
 
 const STORAGE_KEY = 'domian-hub-demo-v1';
 const SUPPORT_CATEGORIES = ['it', 'hr', 'pr', 'newbuild', 'franchise', 'finance'];
@@ -38,6 +39,8 @@ function stateWithDefaults() {
     calculations: [],
     requests: [],
     audit: [],
+    training: {},
+    candidates: null,
     ...loadState(),
   };
 }
@@ -53,7 +56,11 @@ async function fixtures() {
         if (!r.ok) throw new Error('Не удалось загрузить план недели.');
         return r.json();
       }),
-    ]).then(([content, week]) => ({ content, week }));
+      fetch(new URL('../demo/demo-sections.json', import.meta.url)).then((r) => {
+        if (!r.ok) throw new Error('Не удалось загрузить демонстрационные разделы.');
+        return r.json();
+      }),
+    ]).then(([content, week, sections]) => ({ content, week, sections }));
   }
   return fixturesPromise;
 }
@@ -178,7 +185,7 @@ function eventRows(content) {
     starts_at: futureDate(event.inDays, event.hour),
     kind: event.kind,
     place: event.place || null,
-  }));
+  })).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
 }
 
 function userOffices(content, user) {
@@ -204,9 +211,37 @@ function audit(state, user, action, entity = null, entityId = null, oldValue = n
   state.audit = state.audit.slice(0, 200);
 }
 
+// Примеры заявок и расчётов, чтобы разделы не были пустыми при первом показе.
+function seedSamples(content, state) {
+  if (state.samplesSeeded) return;
+  const offices = officeRows(content);
+  const names = new Map(content.users.map((u) => [u.login, u.displayName]));
+  (content.sampleRequests || []).forEach((r, i) => {
+    state.requests.push({
+      id: 1000 + i, login: r.login, author: names.get(r.login), office: offices.find((o) => o.name === r.office)?.name || null,
+      category: r.category, subject: r.subject, body: r.body, status: r.status, created_at: daysAgoIso(r.daysAgo),
+    });
+  });
+  (content.sampleCalculations || []).forEach((c, i) => {
+    const calculator = CALCULATORS[c.calculator];
+    state.calculations.push({
+      id: 2000 + i, login: c.login, calculator: c.calculator, policy_id: calculator.policyId, title: c.title,
+      input_json: JSON.stringify(c.input), result_json: JSON.stringify(calculator.run(c.input, POLICIES[calculator.policyId])),
+      created_at: daysAgoIso(i + 1),
+    });
+  });
+  state.samplesSeeded = true;
+}
+
+function hrCandidates(sections, state) {
+  if (!state.candidates) state.candidates = sections.hr.candidates.map((c) => ({ ...c, started_at: daysAgoIso(c.startedDaysAgo) }));
+  return state.candidates;
+}
+
 export async function demoApi(path, { method = 'GET', body = {} } = {}) {
-  const { content, week } = await fixtures();
+  const { content, week, sections } = await fixtures();
   const state = stateWithDefaults();
+  seedSamples(content, state);
   const url = new URL(path, 'https://demo.invalid');
   const pathname = url.pathname;
 
@@ -243,7 +278,8 @@ export async function demoApi(path, { method = 'GET', body = {} } = {}) {
     const day = week.days.find((item) => item.id === dayId) || null;
     const tasks = day?.tasks || [];
     const done = tasks.filter((task) => state.completions[`${user.login}|${today}|${task.id}`]).length;
-    const articles = articleRows(content, user, state).filter((article) => article.unread).slice(0, 5);
+    const articles = articleRows(content, user, state).filter((article) => article.unread)
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 5);
     const requests = state.requests.filter((request) => isStaff(user) || request.login === user.login);
     return {
       today,
@@ -397,6 +433,70 @@ export async function demoApi(path, { method = 'GET', body = {} } = {}) {
     const request = state.requests.find((item) => item.id === Number(supportMatch[1]));
     if (!request) fail(404, 'Заявка не найдена.');
     request.status = body.status;
+    saveState(state);
+    return { ok: true };
+  }
+
+  // ----- Этапы 2–4: финансы, документы, обучение, HR (демо-наполнение) -----
+
+  if (method === 'GET' && pathname === '/api/finance') {
+    const today = moscowDate();
+    const list = allowedOffices(content, user).filter((o) => sections.finance.offices[o.name]);
+    return {
+      offices: list.map((office) => ({
+        id: office.id, name: office.name, city: office.city,
+        ...officeFinance(sections.finance.offices[office.name], today),
+      })),
+    };
+  }
+
+  if (method === 'GET' && pathname === '/api/documents') {
+    return documentsView(sections.documents);
+  }
+
+  if (method === 'GET' && pathname === '/api/training') {
+    const saved = state.training[user.login] || sections.training.defaultProgress[user.login] || {};
+    return trainingView(sections.training, saved);
+  }
+
+  if (method === 'POST' && pathname === '/api/training/progress') {
+    const course = sections.training.courses.find((c) => c.id === body.courseId);
+    if (!course) fail(404, 'Курс не найден.');
+    const saved = { ...(state.training[user.login] || sections.training.defaultProgress[user.login] || {}) };
+    saved[course.id] = Math.max(0, Math.min(course.lessons.length, Number(body.done) || 0));
+    state.training[user.login] = saved;
+    saveState(state);
+    return { ok: true };
+  }
+
+  if (method === 'GET' && pathname === '/api/hr') {
+    const allowed = new Set(allowedOffices(content, user).map((o) => o.name));
+    const candidates = hrCandidates(sections, state).filter((c) => isStaff(user) || allowed.has(c.office));
+    saveState(state);
+    return { stages: sections.hr.stages, stageOwners: sections.hr.stageOwners, candidates, checklists: sections.hr.checklists, canAdvance: isStaff(user) };
+  }
+
+  if (method === 'POST' && pathname === '/api/hr/candidates') {
+    const office = allowedOffices(content, user).find((o) => o.id === Number(body.officeId));
+    if (!office) fail(403, 'Выберите свой офис.');
+    const name = String(body.name || '').trim().slice(0, 80);
+    if (!name) fail(400, 'Укажите имя кандидата.');
+    const list = hrCandidates(sections, state);
+    list.unshift({
+      id: Date.now(), name, office: office.name, position: String(body.position || 'Агент').slice(0, 40),
+      stage: 0, started_at: isoNow(),
+    });
+    audit(state, user, 'hr.candidate.create', 'candidate', list[0].id);
+    saveState(state);
+    return { ok: true };
+  }
+
+  const advanceMatch = pathname.match(/^\/api\/hr\/candidates\/(\d+)\/advance$/);
+  if (method === 'POST' && advanceMatch) {
+    if (!isStaff(user)) fail(403, 'Этапы меняет HR-отдел.');
+    const candidate = hrCandidates(sections, state).find((c) => c.id === Number(advanceMatch[1]));
+    if (!candidate) fail(404, 'Кандидат не найден.');
+    candidate.stage = Math.min(sections.hr.stages.length - 1, candidate.stage + 1);
     saveState(state);
     return { ok: true };
   }

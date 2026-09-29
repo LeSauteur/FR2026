@@ -11,6 +11,7 @@ cpSync(join(root, 'public'), dist, { recursive: true });
 cpSync(join(root, 'shared'), join(dist, 'shared'), { recursive: true });
 cpSync(join(root, 'seed', 'demo-content.json'), join(dist, 'demo', 'demo-content.json'));
 cpSync(join(root, 'seed', 'week.json'), join(dist, 'demo', 'week.json'));
+cpSync(join(root, 'seed', 'demo-sections.json'), join(dist, 'demo', 'demo-sections.json'));
 writeFileSync(join(dist, '.nojekyll'), '');
 
 console.log(`GitHub Pages demo assembled in ${dist}`);
